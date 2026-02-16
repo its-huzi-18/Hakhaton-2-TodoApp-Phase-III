@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "../../src/lib/auth";
+import { useAuth } from "../../hooks/auth";
 import ChatInterface from "../../src/components/ChatInterface";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -33,7 +33,7 @@ export default function ChatPage() {
           </p>
         </div>
       </header>
-      
+
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white/5 backdrop-blur-lg rounded-xl shadow-xl p-4 sm:p-6 h-[60vh] max-w-4xl mx-auto">
           <ChatInterface userId={user?.id} />
