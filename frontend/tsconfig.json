@@ -19,9 +19,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"],
-      "@/lib/*": ["./lib/*"],
-      "@/hooks/*": ["./hooks/*"]
+      "@/*": ["./src/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/app/*": ["./app/*"]
     }
   },
   "include": [
