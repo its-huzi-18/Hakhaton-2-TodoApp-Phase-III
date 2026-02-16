@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@/lib/auth";
-import ChatInterface from "@/components/ChatInterface";
+import { useAuth } from "../../src/lib/auth";
+import ChatInterface from "../../src/components/ChatInterface";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
