@@ -259,4 +259,4 @@ coverage.xml
 pytestdebug.log
 
 # Coverage
-.coverage*
+.coverage*!frontend/src/lib/ 
