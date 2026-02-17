@@ -13,7 +13,7 @@ from app.config import settings
 from app.db import get_db
 from app.models import User, UserCreate, UserRead
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(tags=["Authentication"])
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

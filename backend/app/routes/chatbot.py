@@ -23,12 +23,12 @@ from app.models import (
 )
 from app.services.chat_service import get_chat_service
 
-router = APIRouter(prefix="/api", tags=["Chatbot"])
+router = APIRouter(tags=["Chatbot"])
 
 
 @router.post("/{user_id}/chat", response_model=ChatMessageRead)
 async def chat_with_bot(
-    user_id: str,
+    user_id: int,
     user_message: ChatRequest,
     db: AsyncSession = Depends(get_db),
 ):
@@ -38,11 +38,11 @@ async def chat_with_bot(
     """
     # Validate user_id format
     try:
-        user_uuid = UUID(user_id)
+        user_id_int = int(user_id)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid user ID format: {user_id}. Expected a valid UUID.",
+            detail=f"Invalid user ID format: {user_id}. Expected an integer.",
         )
 
     # Validate message content
@@ -56,7 +56,7 @@ async def chat_with_bot(
         # Process message through chat service
         chat_service = get_chat_service()
         result = await chat_service.process_user_message(
-            user_id=user_id,
+            user_id=str(user_id_int),
             user_message=user_message.content,
             db_session=db,
             conversation_id=None  # Create new or use most recent conversation
@@ -118,21 +118,15 @@ async def chat_with_bot(
 
 @router.get("/conversations/{user_id}", response_model=List[ConversationRead])
 async def get_user_conversations(
-    user_id: str,
+    user_id: int,
     db: AsyncSession = Depends(get_db),
 ):
     """Get all conversations for a user"""
-    try:
-        user_uuid = UUID(user_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid user ID format",
-        )
-
+    from sqlmodel import select
+    
     result = await db.execute(
         select(Conversation).where(
-            Conversation.user_id == user_uuid
+            Conversation.user_id == user_id
         ).order_by(Conversation.created_at.desc())
     )
     conversations = result.scalars().all()
@@ -141,20 +135,14 @@ async def get_user_conversations(
 
 @router.delete("/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_conversation(
-    conversation_id: str,
+    conversation_id: int,
     db: AsyncSession = Depends(get_db),
 ):
     """Delete a conversation by ID"""
-    try:
-        conv_uuid = UUID(conversation_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid conversation ID format",
-        )
-
+    from sqlmodel import select
+    
     result = await db.execute(
-        select(Conversation).where(Conversation.id == conv_uuid)
+        select(Conversation).where(Conversation.id == conversation_id)
     )
     conversation = result.scalar_one_or_none()
 

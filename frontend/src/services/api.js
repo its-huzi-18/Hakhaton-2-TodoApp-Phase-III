@@ -16,7 +16,7 @@ class ApiService {
 
   async sendMessage(userId, message, conversationId = null) {
     try {
-      // New endpoint format: POST /api/{user_id}/chat
+      // Endpoint: POST /api/{user_id}/chat
       const endpoint = `${this.baseUrl}/${userId}/chat`;
 
       const token = this.getAuthToken();

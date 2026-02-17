@@ -1,14 +1,13 @@
 from datetime import datetime
 from typing import Optional, List
-from uuid import UUID, uuid4
 
 from pydantic import EmailStr, Field
-from sqlmodel import Column, DateTime, Field as SQLField, SQLModel
+from sqlmodel import Field as SQLField, SQLModel
 
 
 # Base model for common fields
 class BaseModel(SQLModel):
-    id: UUID = SQLField(default_factory=uuid4, primary_key=True)
+    id: int = SQLField(default=None, primary_key=True)
     created_at: datetime = SQLField(default_factory=datetime.utcnow)
 
 
@@ -25,7 +24,7 @@ class UserCreate(UserBase):
 
 
 class UserRead(UserBase):
-    id: UUID
+    id: int
     created_at: datetime
 
 
@@ -36,7 +35,7 @@ class TaskBase(SQLModel):
 
 
 class Task(TaskBase, BaseModel, table=True):
-    user_id: UUID = Field(foreign_key="user.id", index=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
 
 
 class TaskCreate(TaskBase):
@@ -50,8 +49,8 @@ class TaskUpdate(SQLModel):
 
 
 class TaskRead(TaskBase):
-    id: UUID
-    user_id: UUID
+    id: int
+    user_id: int
     created_at: datetime
 
 
@@ -59,7 +58,7 @@ class TaskRead(TaskBase):
 class ChatMessageBase(SQLModel):
     role: str  # 'user' or 'assistant'
     content: str
-    conversation_id: UUID = Field(foreign_key="conversation.id", index=True)
+    conversation_id: int = Field(foreign_key="conversation.id", index=True)
 
 
 class ChatMessage(ChatMessageBase, BaseModel, table=True):
@@ -70,12 +69,6 @@ class ChatMessageCreate(ChatMessageBase):
     pass
 
 
-class ChatMessageRequest(SQLModel):
-    """Request model for chat messages where conversation_id comes from URL path"""
-    role: str = "user"  # Default to user role
-    content: str
-
-
 class ChatRequest(SQLModel):
     content: str
 
@@ -83,7 +76,7 @@ class ChatRequest(SQLModel):
 class ToolCallResponse(SQLModel):
     name: str
     arguments: dict
-    response: dict
+    response: dict | list | None = None
 
 
 class TaskUpdateResponse(SQLModel):
@@ -93,7 +86,7 @@ class TaskUpdateResponse(SQLModel):
 
 
 class ChatMessageRead(ChatMessageBase):
-    id: UUID
+    id: int
     created_at: datetime
     tool_calls: List[ToolCallResponse] = []
     task_updates: List[TaskUpdateResponse] = []
@@ -101,7 +94,7 @@ class ChatMessageRead(ChatMessageBase):
 
 class ConversationBase(SQLModel):
     title: str = Field(default="New Conversation")
-    user_id: UUID = Field(foreign_key="user.id", index=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
 
 
 class Conversation(ConversationBase, BaseModel, table=True):
@@ -112,20 +105,6 @@ class ConversationCreate(ConversationBase):
     pass
 
 
-class ConversationUpdate(SQLModel):
-    title: Optional[str] = Field(default=None, max_length=200)
-
-
 class ConversationRead(ConversationBase):
-    id: UUID
+    id: int
     created_at: datetime
-
-
-# Export Base for SQLAlchemy metadata
-from sqlmodel.main import SQLModelMetaclass
-
-Base = SQLModelMetaclass(
-    "Base",
-    (BaseModel,),
-    {},
-)

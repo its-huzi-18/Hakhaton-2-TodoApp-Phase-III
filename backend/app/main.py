@@ -30,16 +30,16 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.parsed_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth.router)
-app.include_router(chatbot.router)
-app.include_router(tasks.router)
+# Include routers with /api prefix
+app.include_router(auth.router, prefix="/api/auth")
+app.include_router(chatbot.router, prefix="/api")
+app.include_router(tasks.router, prefix="/api/tasks")
 
 
 @app.get("/")

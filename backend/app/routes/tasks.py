@@ -8,7 +8,7 @@ from app.auth.jwt import get_current_user_id
 from app.db import get_db
 from app.models import Task, TaskCreate, TaskRead, TaskUpdate, User
 
-router = APIRouter(prefix="/tasks", tags=["Tasks"])
+router = APIRouter(tags=["Tasks"])
 
 
 @router.get("", response_model=list[TaskRead])
@@ -21,7 +21,7 @@ async def get_tasks(
         select(Task).where(Task.user_id == user_id).order_by(Task.created_at.desc())
     )
     tasks = result.scalars().all()
-    return tasks
+    return {"tasks": tasks}
 
 
 @router.post("", response_model=TaskRead, status_code=status.HTTP_201_CREATED)

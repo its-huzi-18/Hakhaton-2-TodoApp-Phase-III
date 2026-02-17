@@ -61,11 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
-      
+
       // Store user data in localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      
+
       setUser(data.user);
       router.push('/dashboard');
     } catch (err: any) {
@@ -81,8 +81,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      // API call to register endpoint
-      const response = await fetch('/api/auth/register', {
+      // API call to backend register endpoint
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,15 +92,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        throw new Error('Registration failed');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Registration failed');
       }
 
       const data = await response.json();
-      
+
       // Store user data in localStorage
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('token', data.access_token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      
+
       setUser(data.user);
       router.push('/dashboard');
     } catch (err: any) {
@@ -114,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Clear stored data
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
+
     setUser(null);
     router.push('/');
   };

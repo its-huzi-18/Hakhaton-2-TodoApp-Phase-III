@@ -5,7 +5,6 @@ by both the REST API endpoints and the AI agent tools.
 """
 
 from typing import List, Optional
-from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Task, TaskCreate, TaskUpdate, TaskRead
@@ -19,8 +18,9 @@ class TaskService:
 
     def __init__(self, db_session: AsyncSession):
         self.db = db_session
+        self.model = Task
 
-    async def get_tasks(self, user_id: UUID, is_completed: Optional[bool] = None) -> List[Task]:
+    async def get_tasks(self, user_id: int, is_completed: Optional[bool] = None) -> List[Task]:
         """
         Retrieve tasks for a specific user with optional completion status filter.
 
@@ -44,7 +44,7 @@ class TaskService:
 
         return tasks
 
-    async def create_task(self, task_data: TaskCreate, user_id: UUID) -> Task:
+    async def create_task(self, task_data: TaskCreate, user_id: int) -> Task:
         """
         Create a new task for the specified user.
 
@@ -66,7 +66,31 @@ class TaskService:
 
         return new_task
 
-    async def get_task(self, task_id: UUID, user_id: UUID) -> Optional[Task]:
+    async def create_task_with_id(self, task_data: TaskCreate, user_id: int, task_id: int) -> Task:
+        """
+        Create a new task with a specific ID (for MCP tools).
+
+        Args:
+            task_data: TaskCreate object containing task information
+            user_id: The ID of the user creating the task
+            task_id: The specific ID to assign to the task
+
+        Returns:
+            Created Task object
+        """
+        new_task = Task(
+            id=task_id,
+            **task_data.model_dump(),
+            user_id=user_id,
+        )
+
+        self.db.add(new_task)
+        await self.db.commit()
+        await self.db.refresh(new_task)
+
+        return new_task
+
+    async def get_task(self, task_id: int, user_id: int) -> Optional[Task]:
         """
         Get a specific task by ID for the specified user.
 
@@ -84,7 +108,7 @@ class TaskService:
 
         return task
 
-    async def update_task(self, task_id: UUID, task_update: TaskUpdate, user_id: UUID) -> Optional[Task]:
+    async def update_task(self, task_id: int, task_update: TaskUpdate, user_id: int) -> Optional[Task]:
         """
         Update an existing task for the specified user.
 
@@ -114,7 +138,7 @@ class TaskService:
 
         return task
 
-    async def delete_task(self, task_id: UUID, user_id: UUID) -> bool:
+    async def delete_task(self, task_id: int, user_id: int) -> bool:
         """
         Delete a task for the specified user.
 
@@ -138,7 +162,7 @@ class TaskService:
 
         return True
 
-    async def complete_task(self, task_id: UUID, user_id: UUID) -> Optional[Task]:
+    async def complete_task(self, task_id: int, user_id: int) -> Optional[Task]:
         """
         Mark a task as completed for the specified user.
 

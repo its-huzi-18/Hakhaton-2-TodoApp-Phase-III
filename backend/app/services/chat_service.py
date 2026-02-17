@@ -39,20 +39,16 @@ class ChatService:
         Returns:
             Dictionary containing the AI response and conversation info
         """
-        # Validate that user_id is a proper UUID string
-        from uuid import UUID as UUID4
-
+        # Validate that user_id is an integer
         try:
-            # Validate that the user_id is a proper UUID
-            user_uuid = UUID4(user_id)
-        except ValueError:
-            # Log the error for debugging purposes
-            print(f"ERROR: Invalid user ID format received: '{user_id}'. Expected a valid UUID.")
-            raise ValueError(f"Invalid user ID format: {user_id}. User ID must be a valid UUID.")
+            user_id_int = int(user_id)
+        except (ValueError, TypeError):
+            print(f"ERROR: Invalid user ID format received: '{user_id}'. Expected an integer.")
+            raise ValueError(f"Invalid user ID format: {user_id}. User ID must be an integer.")
 
         # Get or create conversation
         conversation = await self._get_or_create_conversation(
-            user_uuid, db_session, conversation_id
+            user_id_int, db_session, conversation_id
         )
 
         # Add user's message to the conversation
@@ -73,7 +69,7 @@ class ChatService:
         # Process the message with AI service
         ai_result = await self.ai_service.process_natural_language_request(
             user_message=user_message,
-            user_id=user_id,
+            user_id=user_id_int,
             conversation_history=conversation_history,
             db_session=db_session
         )
@@ -98,40 +94,32 @@ class ChatService:
 
     async def _get_or_create_conversation(
         self,
-        user_id: UUID,
-        db_session: AsyncSession,
+        user_id: int,
+        db_session,
         conversation_id: Optional[str] = None
-    ) -> Conversation:
+    ):
         """
         Get an existing conversation or create a new one.
-
-        Args:
-            user_id: The ID of the user
-            db_session: Database session
-            conversation_id: Optional conversation ID to retrieve
-
-        Returns:
-            Conversation object
         """
+        from sqlmodel import select
+        from app.models import Conversation, ConversationCreate
+        
         if conversation_id:
-            # Try to get the specific conversation
             try:
-                conv_uuid = UUID(conversation_id)
+                conv_id = int(conversation_id)
                 result = await db_session.execute(
                     select(Conversation).where(
-                        Conversation.id == conv_uuid,
+                        Conversation.id == conv_id,
                         Conversation.user_id == user_id
                     )
                 )
                 conversation = result.scalar_one_or_none()
-
                 if conversation:
                     return conversation
             except ValueError:
-                # Invalid UUID format, will create a new conversation
                 pass
 
-        # Find the most recent conversation for this user, or create a new one
+        # Find most recent conversation or create new
         result = await db_session.execute(
             select(Conversation)
             .where(Conversation.user_id == user_id)
@@ -141,15 +129,11 @@ class ChatService:
         conversation = result.scalar_one_or_none()
 
         if not conversation:
-            # Create a new conversation
-            from app.models import ConversationCreate
             conversation_data = ConversationCreate(
-                title=f"Chat with {user_id}",
+                title=f"Chat with user {user_id}",
                 user_id=user_id,
             )
-            conversation = Conversation(
-                **conversation_data.model_dump(),
-            )
+            conversation = Conversation(**conversation_data.model_dump())
             db_session.add(conversation)
             await db_session.commit()
             await db_session.refresh(conversation)
@@ -158,21 +142,14 @@ class ChatService:
 
     async def _get_conversation_history(
         self,
-        conversation_id: UUID,
-        db_session: AsyncSession,
+        conversation_id: int,
+        db_session,
         limit: int = 20
-    ) -> List[Dict[str, str]]:
-        """
-        Retrieve the conversation history for context.
-
-        Args:
-            conversation_id: The ID of the conversation
-            db_session: Database session
-            limit: Maximum number of messages to retrieve
-
-        Returns:
-            List of message dictionaries
-        """
+    ):
+        """Retrieve conversation history for context."""
+        from sqlmodel import select
+        from app.models import ChatMessage
+        
         result = await db_session.execute(
             select(ChatMessage)
             .where(ChatMessage.conversation_id == conversation_id)
@@ -181,13 +158,9 @@ class ChatService:
         )
         messages = result.scalars().all()
 
-        # Reverse the order to have oldest first (chronological)
         history = []
         for msg in reversed(messages):
-            history.append({
-                "role": msg.role,
-                "content": msg.content
-            })
+            history.append({"role": msg.role, "content": msg.content})
 
         return history
 
