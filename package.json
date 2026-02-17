@@ -1,0 +1,14 @@
+{
+  "name": "hakhaton-todoapp-phase-iii",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "dev": "cd frontend && npm run dev",
+    "start": "cd frontend && npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/hakhaton-todoapp-phase-iii.git"
+  }
+}
