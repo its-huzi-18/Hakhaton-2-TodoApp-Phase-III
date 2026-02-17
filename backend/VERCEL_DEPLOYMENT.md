@@ -56,6 +56,14 @@ This happens when:
 3. Set it to: `backend`
 4. Redeploy
 
+### "Failed to run uv sync" error
+This happens when Vercel tries to use `uv` package manager instead of `pip`.
+
+**Fix:**
+- `pyproject.toml` has been removed from backend
+- Vercel will now use `pip install -r requirements.txt`
+- Make sure Root Directory is set to `backend`
+
 ### Still getting size error?
 
 1. Delete the Vercel project
