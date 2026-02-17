@@ -14,8 +14,8 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.2.0
 
-# Pydantic - must be >=2.10 for openai-agents
-pydantic==2.10.0
+# Pydantic - must be >=2.12.3 for openai-agents==0.6.5
+pydantic==2.12.3
 pydantic-settings==2.6.0
 
 # HTTP and utilities
