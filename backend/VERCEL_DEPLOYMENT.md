@@ -56,13 +56,22 @@ This happens when:
 3. Set it to: `backend`
 4. Redeploy
 
-### "Failed to run uv sync" error
-This happens when Vercel tries to use `uv` package manager instead of `pip`.
+### "Failed to run uv sync" or "Failed to run uv lock" error
+This happens when Vercel detects `pyproject.toml`, `package.json`, or `uv.lock` and tries to use `uv` package manager instead of `pip`.
 
-**Fix:**
-- `pyproject.toml` has been removed from backend
-- Vercel will now use `pip install -r requirements.txt`
-- Make sure Root Directory is set to `backend`
+**Fix (Already Applied):**
+- ✅ `pyproject.toml` has been removed from backend
+- ✅ `package.json` has been removed from backend
+- ✅ Version folders (0.27.0, etc.) have been removed
+- ✅ Only `requirements.txt` remains
+- ✅ Vercel will now use `pip install -r requirements.txt`
+- ✅ Make sure Root Directory is set to `backend`
+
+If you still see this error:
+1. Delete your Vercel project
+2. Create a new one
+3. Set Root Directory to `backend` BEFORE first deploy
+4. Deploy
 
 ### Still getting size error?
 
