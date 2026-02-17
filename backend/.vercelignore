@@ -35,5 +35,4 @@ env/
 
 # Ignore other non-essential files
 *.bat
-*.sh
 README.md
