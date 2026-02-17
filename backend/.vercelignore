@@ -1,0 +1,39 @@
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Ignore test files
+test_*.py
+*_test.py
+conftest.py
+
+# Ignore IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore version folders
+[0-9].[0-9].[0-9]/
+[0-9].[0-9].0/
+[0-9].[0-9]/
+
+# Ignore lock files
+*.lock
+package-lock.json
+
+# Ignore venv
+venv/
+.venv/
+env/
+
+# Ignore other non-essential files
+*.bat
+*.sh
+README.md
